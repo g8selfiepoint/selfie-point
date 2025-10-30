@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visitor | Photo Booth</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fc;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      max-width: 600px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #2c3e50; }
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { background: #2980b9; }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .photo-card {
+      margin: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .photo-card img {
+      width: 200px;
+      display: block;
+    }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🖼️ View Your Photos</h1>
+    <input type="text" id="code" placeholder="Enter your 5-digit code"><br>
+    <button onclick="viewPhotos()">View Photos</button>
+    <div id="gallery"></div>
+  </div>
+
+  <script>
+    function viewPhotos() {
+      const code = document.getElementById('code').value.trim();
+      const data = JSON.parse(localStorage.getItem('photoData') || '{}');
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = "";
+
+      if (!data[code]) {
+        gallery.innerHTML = "<p class='error'>❌ No photos found for that code.</p>";
+        return;
+      }
+
+      const photos = data[code];
+      let html = "<div class='gallery'>";
+      for (let src of photos) {
+        html += `
+          <div class="photo-card">
+            <img src="${src}" alt="Photo">
+            <a href="${src}" download="photo.jpg">Download</a>
+          </div>`;
+      }
+      html += "</div>";
+      gallery.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
