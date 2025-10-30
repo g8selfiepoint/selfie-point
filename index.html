@@ -3,47 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirecting...</title>
+  <title>Charvik Programs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f7f9fc;
+      background-color: #000;
+      color: white;
       margin: 0;
-      padding: 0;
+      height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      flex-direction: column;
+      text-align: center;
     }
-    h2 {
-      color: #2c3e50;
-      margin-bottom: 10px;
+
+    h1 {
+      font-size: 80px;
+      color: #3498db;
+      margin: 0;
     }
+
+    p {
+      font-size: 20px;
+      color: white;
+      margin-top: 10px;
+    }
+
     .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
+      border: 5px solid #222;
+      border-top: 5px solid #3498db;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 15px;
+      width: 60px;
+      height: 60px;
+      animation: spin 1.2s linear infinite;
+      margin-top: 25px;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
   </style>
+
   <script>
-    // Redirect after 1 second to visitor.html
+    // Redirect after 2 seconds
     setTimeout(() => {
       window.location.href = "visitor.html";
-    }, 1000);
+    }, 2000);
   </script>
 </head>
 <body>
+  <h1>Charvik Programs</h1>
+  <p>Redirecting...</p>
   <div class="loader"></div>
-  <h2>Redirecting to the main page...</h2>
-  <p>If it doesn’t redirect, <a href="visitor.html">click here</a>.</p>
 </body>
 </html>
