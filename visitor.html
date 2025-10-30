@@ -2,92 +2,149 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Visitor | Photo Booth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitor Photo Access</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f7f9fc;
-      text-align: center;
+      background-color: #000;
+      color: #fff;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+      text-align: center;
     }
-    .container {
-      background: #fff;
-      max-width: 600px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+    h1 {
+      color: #3498db;
+      font-size: 2.5em;
+      margin-bottom: 20px;
     }
-    h1 { color: #2c3e50; }
-    input {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+
+    p {
+      color: #bbb;
+      font-size: 1em;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      padding: 12px;
       width: 80%;
-      margin-bottom: 10px;
-    }
-    button {
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 10px 20px;
+      max-width: 300px;
       border-radius: 8px;
-      cursor: pointer;
+      border: 2px solid #3498db;
+      background: #111;
+      color: #fff;
+      font-size: 1em;
+      text-align: center;
     }
-    button:hover { background: #2980b9; }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      background-color: #3498db;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
     .gallery {
+      margin-top: 30px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 20px;
+      gap: 20px;
+      padding: 10px;
     }
+
     .photo-card {
-      margin: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 2px solid #3498db;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #111;
+      width: 250px;
+      box-shadow: 0 0 10px rgba(0, 0, 255, 0.3);
     }
+
     .photo-card img {
-      width: 200px;
+      width: 100%;
+      height: auto;
       display: block;
     }
-    .error { color: red; margin-top: 10px; }
+
+    .error {
+      color: red;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+      input[type="text"] {
+        width: 90%;
+      }
+      button {
+        width: 80%;
+      }
+    }
   </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🖼️ View Your Photos</h1>
-    <input type="text" id="code" placeholder="Enter your 5-digit code"><br>
-    <button onclick="viewPhotos()">View Photos</button>
-    <div id="gallery"></div>
-  </div>
 
   <script>
-    function viewPhotos() {
-      const code = document.getElementById('code').value.trim();
-      const data = JSON.parse(localStorage.getItem('photoData') || '{}');
-      const gallery = document.getElementById('gallery');
+    async function fetchPhotos() {
+      const code = document.getElementById("codeInput").value.trim();
+      const gallery = document.getElementById("gallery");
+      const errorBox = document.getElementById("errorBox");
       gallery.innerHTML = "";
+      errorBox.textContent = "";
 
-      if (!data[code]) {
-        gallery.innerHTML = "<p class='error'>❌ No photos found for that code.</p>";
+      if (code === "") {
+        errorBox.textContent = "Please enter your 5-digit code.";
         return;
       }
 
-      const photos = data[code];
-      let html = "<div class='gallery'>";
-      for (let src of photos) {
-        html += `
-          <div class="photo-card">
-            <img src="${src}" alt="Photo">
-            <a href="${src}" download="photo.jpg">Download</a>
-          </div>`;
+      try {
+        const response = await fetch("data.json");
+        const data = await response.json();
+
+        if (!data[code]) {
+          errorBox.textContent = "❌ No photos found for that code.";
+          return;
+        }
+
+        data[code].forEach(url => {
+          const card = document.createElement("div");
+          card.className = "photo-card";
+          card.innerHTML = `<img src="${url}" alt="Visitor Photo">`;
+          gallery.appendChild(card);
+        });
+
+      } catch (error) {
+        errorBox.textContent = "⚠️ Error loading photos.";
       }
-      html += "</div>";
-      gallery.innerHTML = html;
     }
   </script>
+</head>
+<body>
+  <h1>📸 View Your Photos</h1>
+  <p>Enter your 5-digit code below to access your pictures</p>
+
+  <input type="text" id="codeInput" placeholder="Enter Code" maxlength="5">
+  <button onclick="fetchPhotos()">View Photos</button>
+  <div id="errorBox" class="error"></div>
+
+  <div id="gallery" class="gallery"></div>
 </body>
 </html>
