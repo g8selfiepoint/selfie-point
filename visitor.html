@@ -29,6 +29,9 @@
       color: white;
       margin-top: 20px;
     }
+    input::-webkit-inner-spin-button {
+      display: none;
+    }
     button {
       background-color: #007bff;
       color: white;
@@ -48,42 +51,19 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 25px;
+      gap: 20px;
       margin-top: 30px;
     }
-    .photo-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #0a0a0a;
-      border: 2px solid #007bff;
-      border-radius: 12px;
-      padding: 10px;
-      transition: 0.3s;
-    }
-    .photo-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 12px #00aaff;
-    }
-    .photo-card img {
+    .gallery img {
       width: 250px;
       height: 180px;
       object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      border-radius: 10px;
+      border: 2px solid #00aaff;
+      transition: transform 0.3s;
     }
-    .download-btn {
-      background-color: #00aaff;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: 0.3s;
-    }
-    .download-btn:hover {
-      background-color: #007bff;
+    .gallery img:hover {
+      transform: scale(1.05);
     }
     .message {
       color: #ff4444;
@@ -94,66 +74,52 @@
 <body>
 
 <h1>🖼️ View Uploaded Photos</h1>
-<p>Enter your 5-digit code to view the images:</p>
+<p>Enter your 5-digit code to view your photos:</p>
 
-<input type="text" id="codeInput" maxlength="5" placeholder="Enter code">
+<input type="number" id="codeInput" maxlength="5" placeholder="12345" oninput="limitDigits(this)">
 <button onclick="fetchPhotos()">View</button>
 
 <div id="output" class="message"></div>
 <div class="gallery" id="gallery"></div>
 
 <script>
+function limitDigits(input) {
+  if (input.value.length > 5) input.value = input.value.slice(0, 5);
+}
+
 async function fetchPhotos() {
   const code = document.getElementById("codeInput").value.trim();
   const output = document.getElementById("output");
   const gallery = document.getElementById("gallery");
+
   output.textContent = "";
   gallery.innerHTML = "";
 
-  if (!code) {
-    output.textContent = "⚠️ Please enter a valid code.";
+  if (!/^[0-9]{5}$/.test(code)) {
+    output.textContent = "⚠️ Please enter a valid 5-digit numeric code.";
     return;
   }
 
-  output.textContent = "Loading images...";
+  output.textContent = `🔎 Searching for photos with code ${code}...`;
 
   try {
     const response = await fetch(`https://admin-img-backend.onrender.com/get-photos/${code}`);
     const data = await response.json();
 
     if (data.success && data.links.length > 0) {
-      output.textContent = `✅ Found ${data.links.length} image(s) for code ${code}`;
+      output.innerHTML = `✅ Found ${data.links.length} image(s) for code <b>${code}</b>`;
       data.links.forEach(link => {
-        const card = document.createElement("div");
-        card.className = "photo-card";
-
         const img = document.createElement("img");
         img.src = link;
         img.alt = "Uploaded photo";
-
-        const downloadBtn = document.createElement("button");
-        downloadBtn.className = "download-btn";
-        downloadBtn.textContent = "⬇ Download";
-
-        downloadBtn.onclick = () => {
-          const a = document.createElement("a");
-          a.href = link;
-          a.download = link.split('/').pop(); // use filename
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        };
-
-        card.appendChild(img);
-        card.appendChild(downloadBtn);
-        gallery.appendChild(card);
+        gallery.appendChild(img);
       });
     } else {
-      output.textContent = "❌ Invalid or expired code. No images found.";
+      output.textContent = `❌ No photos found for code ${code}.`;
     }
   } catch (error) {
     console.error(error);
-    output.textContent = "⚠️ Error fetching images.";
+    output.textContent = "⚠️ Server unavailable. Please try again later.";
   }
 }
 </script>
