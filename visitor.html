@@ -3,168 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visitor - Charvik Programs</title>
+  <title>View Images - Charvik Programs</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #0a0a0a;
+      background-color: #000;
       color: #00aaff;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
       text-align: center;
-      padding-top: 50px;
+      margin: 0;
+      padding: 40px 20px;
     }
-
     h1 {
+      font-size: 2.2em;
       color: #00aaff;
-      font-size: 2.5em;
       text-shadow: 0 0 10px #007bff;
-      margin-bottom: 10px;
     }
-
-    p {
-      color: #b0c4de;
-      margin-bottom: 25px;
-      font-size: 1em;
-    }
-
-    input[type="text"] {
+    input {
       padding: 12px;
-      width: 80%;
-      max-width: 300px;
+      font-size: 1.2em;
       border-radius: 8px;
       border: 2px solid #007bff;
-      background: #111;
-      color: #fff;
-      font-size: 1em;
+      width: 180px;
       text-align: center;
-      outline: none;
-      transition: 0.3s;
-    }
-
-    input[type="text"]:focus {
-      border-color: #00aaff;
-      box-shadow: 0 0 8px #00aaff;
-    }
-
-    button {
+      background: #111;
+      color: white;
       margin-top: 20px;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 8px;
+    }
+    button {
       background-color: #007bff;
       color: white;
-      font-size: 1em;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 1em;
+      margin-left: 10px;
       transition: 0.3s;
     }
-
     button:hover {
       background-color: #00aaff;
       box-shadow: 0 0 10px #00aaff;
     }
-
     .gallery {
-      margin-top: 40px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 20px;
-      padding: 20px;
+      margin-top: 30px;
     }
-
-    .photo-card {
-      border: 2px solid #007bff;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #111;
+    .gallery img {
       width: 250px;
-      box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #00aaff;
       transition: transform 0.3s;
     }
-
-    .photo-card:hover {
+    .gallery img:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
     }
-
-    .photo-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .error {
-      color: #ff4d4d;
+    .message {
+      color: #ff4444;
       margin-top: 20px;
-      font-weight: bold;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2em;
-      }
-      input[type="text"] {
-        width: 90%;
-      }
-      button {
-        width: 80%;
-      }
-      .photo-card {
-        width: 200px;
-      }
     }
   </style>
-
-  <script>
-    async function fetchPhotos() {
-      const code = document.getElementById("codeInput").value.trim();
-      const gallery = document.getElementById("gallery");
-      const errorBox = document.getElementById("errorBox");
-      gallery.innerHTML = "";
-      errorBox.textContent = "";
-
-      if (code === "") {
-        errorBox.textContent = "⚠️ Please enter your 5-digit code.";
-        return;
-      }
-
-      try {
-        const response = await fetch("data.json");
-        const data = await response.json();
-
-        if (!data[code]) {
-          errorBox.textContent = "❌ No photos found for this code.";
-          return;
-        }
-
-        data[code].forEach(url => {
-          const card = document.createElement("div");
-          card.className = "photo-card";
-          card.innerHTML = `<img src="${url}" alt="Visitor Photo">`;
-          gallery.appendChild(card);
-        });
-
-      } catch (error) {
-        errorBox.textContent = "⚠️ Error loading photos. Please try again.";
-        console.error(error);
-      }
-    }
-  </script>
 </head>
 <body>
-  <h1>📸 View Your Selfie</h1>
-  <p>Enter your 5-digit access code to see your photos!</p>
 
-  <input type="text" id="codeInput" placeholder="Enter Code" maxlength="5">
-  <button onclick="fetchPhotos()">🔍 View Photos</button>
+<h1>🖼️ View Uploaded Photos</h1>
+<p>Enter your 5-digit code to view the images:</p>
 
-  <div id="errorBox" class="error"></div>
-  <div id="gallery" class="gallery"></div>
+<input type="text" id="codeInput" maxlength="5" placeholder="Enter code">
+<button onclick="fetchPhotos()">View</button>
+
+<div id="output" class="message"></div>
+<div class="gallery" id="gallery"></div>
+
+<script>
+async function fetchPhotos() {
+  const code = document.getElementById("codeInput").value.trim();
+  const output = document.getElementById("output");
+  const gallery = document.getElementById("gallery");
+  output.textContent = "";
+  gallery.innerHTML = "";
+
+  if (!code) {
+    output.textContent = "⚠️ Please enter a valid code.";
+    return;
+  }
+
+  output.textContent = "Loading images...";
+
+  try {
+    const response = await fetch(`https://admin-img-backend.onrender.com/get-photos/${code}`);
+    const data = await response.json();
+
+    if (data.success && data.links.length > 0) {
+      output.textContent = `✅ Found ${data.links.length} image(s) for code ${code}`;
+      data.links.forEach(link => {
+        const img = document.createElement("img");
+        img.src = link;
+        img.alt = "Uploaded photo";
+        gallery.appendChild(img);
+      });
+    } else {
+      output.textContent = "❌ Invalid or expired code. No images found.";
+    }
+  } catch (error) {
+    console.error(error);
+    output.textContent = "⚠️ Error fetching images.";
+  }
+}
+</script>
+
 </body>
 </html>
