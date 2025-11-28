@@ -23,7 +23,7 @@
       font-size: 1.2em;
       border-radius: 8px;
       border: 2px solid #007bff;
-      width: 180px;
+      width: 220px;
       text-align: center;
       background: #111;
       color: white;
@@ -81,67 +81,95 @@
 <body>
 
 <h1>🖼️ View Uploaded Photos</h1>
-<p>Enter your 5-digit code to view and download your photos:</p>
+<p>Enter your 5-digit code to view your photos, or enter password <b>VIEWALL</b> to see all photos:</p>
 
-<input type="number" id="codeInput" maxlength="5" placeholder="12345" oninput="limitDigits(this)">
+<input type="text" id="codeInput" placeholder="5-digit code or password" oninput="limitLength(this)">
 <button onclick="fetchPhotos()">View</button>
 
 <div id="output" class="message"></div>
 <div class="gallery" id="gallery"></div>
 
 <script>
-function limitDigits(input) {
-  if (input.value.length > 5) input.value = input.value.slice(0, 5);
+function limitLength(input) {
+  if (input.value.length > 5 && input.value !== "VIEWALL") input.value = input.value.slice(0, 5);
 }
 
 async function fetchPhotos() {
-  const code = document.getElementById("codeInput").value.trim();
+  const input = document.getElementById("codeInput").value.trim();
   const output = document.getElementById("output");
   const gallery = document.getElementById("gallery");
 
   output.textContent = "";
   gallery.innerHTML = "";
 
-  if (!/^[0-9]{5}$/.test(code)) {
-    output.textContent = "⚠️ Please enter a valid 5-digit numeric code.";
+  if (!input) {
+    output.textContent = "⚠️ Enter a 5-digit code or the password.";
     return;
   }
 
-  output.textContent = `🔎 Searching for photos with code ${code}...`;
+  // ✅ VIP password mode: view all photos
+  if (input === "VIEWALL") {
+    output.textContent = "🔎 Fetching all photos...";
+    try {
+      const res = await fetch("https://admin-img-backend.onrender.com/images/all");
+      const data = await res.json();
+      if (data.success && data.images.length > 0) {
+        displayGallery(data.images);
+        output.textContent = `✅ Showing all ${data.images.length} photos.`;
+      } else {
+        output.textContent = "❌ No images found.";
+      }
+    } catch (err) {
+      console.error(err);
+      output.textContent = "⚠️ Server unavailable. Try later.";
+    }
+    return;
+  }
+
+  // ✅ Visitor mode: 5-digit code
+  if (!/^[0-9]{5}$/.test(input)) {
+    output.textContent = "⚠️ Enter a valid 5-digit code or the password.";
+    return;
+  }
 
   try {
-    const response = await fetch(`https://admin-img-backend.onrender.com/image/${code}`);
-    const data = await response.json();
-
-    if (data.success && data.images && data.images.length > 0) {
-      output.innerHTML = `✅ Found ${data.images.length} image(s) for code <b>${code}</b>`;
-      data.images.forEach(url => {
-        const card = document.createElement("div");
-        card.classList.add("photo-card");
-
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "Uploaded photo";
-
-        const btn = document.createElement("button");
-        btn.classList.add("download-btn");
-        btn.textContent = "⬇ Download";
-        btn.onclick = () => downloadImage(url);
-
-        card.appendChild(img);
-        card.appendChild(btn);
-        gallery.appendChild(card);
-      });
+    const res = await fetch(`https://admin-img-backend.onrender.com/image/${input}`);
+    const data = await res.json();
+    if (data.success && data.images.length > 0) {
+      output.textContent = `✅ Found ${data.images.length} photo(s) for code ${input}`;
+      displayGallery(data.images);
     } else {
-      output.textContent = `❌ No photos found for code ${code}.`;
+      output.textContent = `❌ No photos found for code ${input}.`;
     }
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     output.textContent = "⚠️ Server unavailable. Please try again later.";
   }
 }
 
-// Trigger browser download
+// Render gallery images
+function displayGallery(images) {
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = "";
+  images.forEach(url => {
+    const card = document.createElement("div");
+    card.classList.add("photo-card");
+
+    const img = document.createElement("img");
+    img.src = url;
+
+    const btn = document.createElement("button");
+    btn.classList.add("download-btn");
+    btn.textContent = "⬇ Download";
+    btn.onclick = () => downloadImage(url);
+
+    card.appendChild(img);
+    card.appendChild(btn);
+    gallery.appendChild(card);
+  });
+}
+
+// Download helper
 function downloadImage(url) {
   const link = document.createElement("a");
   link.href = url;
