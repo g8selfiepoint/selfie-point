@@ -1,82 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Images - Charvik Programs</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #000;
-      color: #00aaff;
-      text-align: center;
-      margin: 0;
-      padding: 40px 20px;
-    }
-    h1 {
-      font-size: 2.2em;
-      color: #00aaff;
-      text-shadow: 0 0 10px #007bff;
-    }
-    input {
-      padding: 12px;
-      font-size: 1.2em;
-      border-radius: 8px;
-      border: 2px solid #007bff;
-      width: 220px;
-      text-align: center;
-      background: #111;
-      color: white;
-      margin-top: 20px;
-    }
-    input::-webkit-inner-spin-button { display: none; }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1em;
-      margin-left: 10px;
-      transition: 0.3s;
-    }
-    button:hover { background-color: #00aaff; box-shadow: 0 0 10px #00aaff; }
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 30px;
-    }
-    .photo-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .photo-card img {
-      width: 250px;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 2px solid #00aaff;
-      transition: transform 0.3s;
-    }
-    .photo-card img:hover { transform: scale(1.05); }
-    .download-btn {
-      margin-top: 8px;
-      background-color: #00aaff;
-      color: #000;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .download-btn:hover { background-color: #007bff; color: #fff; }
-    .message { color: #ff4444; margin-top: 20px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Images - Charvik Programs</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #000;
+    color: #00aaff;
+    text-align: center;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  h1 { font-size: 2.2em; color: #00aaff; text-shadow: 0 0 10px #007bff; }
+  input {
+    padding: 12px; font-size: 1.2em; border-radius: 8px; border: 2px solid #007bff;
+    width: 220px; text-align: center; background: #111; color: white; margin-top: 20px;
+  }
+  input::-webkit-inner-spin-button { display: none; }
+  button {
+    background-color: #007bff; color: white; border: none; padding: 12px 25px;
+    border-radius: 8px; cursor: pointer; font-size: 1em; margin-left: 10px;
+    transition: 0.3s;
+  }
+  button:hover { background-color: #00aaff; box-shadow: 0 0 10px #00aaff; }
+  .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 30px; }
+  .photo-card { display: flex; flex-direction: column; align-items: center; }
+  .photo-card img {
+    width: 250px; height: 180px; object-fit: cover; border-radius: 10px;
+    border: 2px solid #00aaff; transition: transform 0.3s;
+  }
+  .photo-card img:hover { transform: scale(1.05); }
+  .download-btn {
+    margin-top: 8px; background-color: #00aaff; color: #000; border: none;
+    padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;
+    transition: 0.3s;
+  }
+  .download-btn:hover { background-color: #007bff; color: #fff; }
+  .message { color: #ff4444; margin-top: 20px; }
+</style>
 </head>
 <body>
 
@@ -91,7 +54,7 @@
 
 <script>
 function limitLength(input) {
-  if (input.value.length > 5 && input.value !== "VIEWALL") input.value = input.value.slice(0, 5);
+  if (input.value.length > 5 && input.value !== "VIEWALL") input.value = input.value.slice(0,5);
 }
 
 async function fetchPhotos() {
@@ -107,69 +70,52 @@ async function fetchPhotos() {
     return;
   }
 
-  // ✅ Password mode: view all photos
-  if (input === "QWERT") {
-    output.textContent = "🔎 Fetching all photos...";
-    try {
-      const res = await fetch("https://admin-img-backend.onrender.com/images/all?password=QWERT");
-      const data = await res.json();
-      if (data.success && data.images.length > 0) {
-        displayGallery(data.images);
-        output.textContent = `✅ Showing all ${data.images.length} photos.`;
-      } else {
-        output.textContent = "❌ No images found.";
-      }
-    } catch (err) {
-      console.error(err);
-      output.textContent = "⚠️ Server unavailable. Try later.";
-    }
-    return;
-  }
-
-  // ✅ Visitor mode: 5-digit code
-  if (!/^[0-9]{5}$/.test(input)) {
-    output.textContent = "⚠️ Enter a valid 5-digit code or the password.";
-    return;
-  }
-
   try {
-    const res = await fetch(`https://admin-img-backend.onrender.com/image/${input}`);
-    const data = await res.json();
-    if (data.success && data.images.length > 0) {
-      output.textContent = `✅ Found ${data.images.length} photo(s) for code ${input}`;
-      displayGallery(data.images);
+    let url;
+    if (input === "VIEWALL") {
+      url = "https://admin-img-backend.onrender.com/images/all?password=QWERT"; // backend password
     } else {
-      output.textContent = `❌ No photos found for code ${input}.`;
+      if (!/^[0-9]{5}$/.test(input)) {
+        output.textContent = "⚠️ Enter a valid 5-digit code or the password.";
+        return;
+      }
+      url = `https://admin-img-backend.onrender.com/image/${input}`;
     }
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.success && data.images && data.images.length > 0) {
+      output.textContent = `✅ Found ${data.images.length} photo(s).`;
+
+      data.images.forEach(imgUrl => {
+        const card = document.createElement("div");
+        card.classList.add("photo-card");
+
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        img.alt = "Uploaded photo";
+
+        const btn = document.createElement("button");
+        btn.classList.add("download-btn");
+        btn.textContent = "⬇ Download";
+        btn.onclick = () => downloadImage(imgUrl);
+
+        card.appendChild(img);
+        card.appendChild(btn);
+        gallery.appendChild(card);
+      });
+
+    } else {
+      output.textContent = `❌ No photos found.`;
+    }
+
   } catch (err) {
     console.error(err);
     output.textContent = "⚠️ Server unavailable. Please try again later.";
   }
 }
 
-// Render gallery images
-function displayGallery(images) {
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
-  images.forEach(url => {
-    const card = document.createElement("div");
-    card.classList.add("photo-card");
-
-    const img = document.createElement("img");
-    img.src = url;
-
-    const btn = document.createElement("button");
-    btn.classList.add("download-btn");
-    btn.textContent = "⬇ Download";
-    btn.onclick = () => downloadImage(url);
-
-    card.appendChild(img);
-    card.appendChild(btn);
-    gallery.appendChild(card);
-  });
-}
-
-// Download helper
 function downloadImage(url) {
   const link = document.createElement("a");
   link.href = url;
