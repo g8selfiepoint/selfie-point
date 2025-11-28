@@ -29,9 +29,7 @@
       color: white;
       margin-top: 20px;
     }
-    input::-webkit-inner-spin-button {
-      display: none;
-    }
+    input::-webkit-inner-spin-button { display: none; }
     button {
       background-color: #007bff;
       color: white;
@@ -43,10 +41,7 @@
       margin-left: 10px;
       transition: 0.3s;
     }
-    button:hover {
-      background-color: #00aaff;
-      box-shadow: 0 0 10px #00aaff;
-    }
+    button:hover { background-color: #00aaff; box-shadow: 0 0 10px #00aaff; }
     .gallery {
       display: flex;
       flex-wrap: wrap;
@@ -67,9 +62,7 @@
       border: 2px solid #00aaff;
       transition: transform 0.3s;
     }
-    .photo-card img:hover {
-      transform: scale(1.05);
-    }
+    .photo-card img:hover { transform: scale(1.05); }
     .download-btn {
       margin-top: 8px;
       background-color: #00aaff;
@@ -81,14 +74,8 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .download-btn:hover {
-      background-color: #007bff;
-      color: #fff;
-    }
-    .message {
-      color: #ff4444;
-      margin-top: 20px;
-    }
+    .download-btn:hover { background-color: #007bff; color: #fff; }
+    .message { color: #ff4444; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -97,7 +84,7 @@
 <p>Enter your 5-digit code to view and download your photos:</p>
 
 <input type="number" id="codeInput" maxlength="5" placeholder="12345" oninput="limitDigits(this)">
-<button onclick="fetchPhoto()">View</button>
+<button onclick="fetchPhotos()">View</button>
 
 <div id="output" class="message"></div>
 <div class="gallery" id="gallery"></div>
@@ -107,7 +94,7 @@ function limitDigits(input) {
   if (input.value.length > 5) input.value = input.value.slice(0, 5);
 }
 
-async function fetchPhoto() {
+async function fetchPhotos() {
   const code = document.getElementById("codeInput").value.trim();
   const output = document.getElementById("output");
   const gallery = document.getElementById("gallery");
@@ -120,32 +107,33 @@ async function fetchPhoto() {
     return;
   }
 
-  output.textContent = `🔎 Searching for photo with code ${code}...`;
+  output.textContent = `🔎 Searching for photos with code ${code}...`;
 
   try {
     const response = await fetch(`https://admin-img-backend.onrender.com/image/${code}`);
     const data = await response.json();
 
-    if (data.success && data.url) {
-      output.textContent = `✅ Found your photo for code ${code}`;
-      
-      const card = document.createElement("div");
-      card.classList.add("photo-card");
+    if (data.success && data.images && data.images.length > 0) {
+      output.innerHTML = `✅ Found ${data.images.length} image(s) for code <b>${code}</b>`;
+      data.images.forEach(url => {
+        const card = document.createElement("div");
+        card.classList.add("photo-card");
 
-      const img = document.createElement("img");
-      img.src = data.url;
-      img.alt = "Uploaded photo";
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Uploaded photo";
 
-      const btn = document.createElement("button");
-      btn.classList.add("download-btn");
-      btn.textContent = "⬇ Download";
-      btn.onclick = () => downloadImage(data.url);
+        const btn = document.createElement("button");
+        btn.classList.add("download-btn");
+        btn.textContent = "⬇ Download";
+        btn.onclick = () => downloadImage(url);
 
-      card.appendChild(img);
-      card.appendChild(btn);
-      gallery.appendChild(card);
+        card.appendChild(img);
+        card.appendChild(btn);
+        gallery.appendChild(card);
+      });
     } else {
-      output.textContent = `❌ No photo found for code ${code}.`;
+      output.textContent = `❌ No photos found for code ${code}.`;
     }
   } catch (error) {
     console.error(error);
