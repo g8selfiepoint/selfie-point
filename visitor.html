@@ -107,11 +107,11 @@ async function fetchPhotos() {
     return;
   }
 
-  // ✅ VIP password mode: view all photos
-  if (input === "VIEWALL") {
+  // ✅ Password mode: view all photos
+  if (input === "QWERT") {
     output.textContent = "🔎 Fetching all photos...";
     try {
-      const res = await fetch("https://admin-img-backend.onrender.com/images/all");
+      const res = await fetch("https://admin-img-backend.onrender.com/images/all?password=QWERT");
       const data = await res.json();
       if (data.success && data.images.length > 0) {
         displayGallery(data.images);
